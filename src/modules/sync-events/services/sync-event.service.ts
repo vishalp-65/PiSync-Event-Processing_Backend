@@ -4,22 +4,21 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  SyncEvent,
+  SyncStatus,
+} from 'src/modules/devices/entities/sync-event.entity';
 import { Repository } from 'typeorm';
-import { SyncEvent, SyncStatus } from '../entities/sync-event.entity';
-import { Device } from '../../devices/entities/device.entity';
-import { CreateSyncEventDto } from '../dto/create-sync-event.dto';
 import { SyncEventRepository } from '../repositories/sync-event.repository';
-import { DeviceService } from '../../devices/services/device.service';
-import { NotificationService } from '../../notifications/services/notification.service';
+import { DeviceService } from 'src/modules/devices/services/device.service';
 
 @Injectable()
 export class SyncEventService {
   constructor(
     @InjectRepository(SyncEvent)
     private syncEventRepository: Repository<SyncEvent>,
-    private syncEventCustomRepository: SyncEventRepository,
     private deviceService: DeviceService,
-    private notificationService: NotificationService,
+    private syncEventCustomRepository: SyncEventRepository,
   ) {}
 
   async createSyncEvent(
@@ -68,13 +67,7 @@ export class SyncEventService {
     // Update device statistics
     await this.deviceService.updateDeviceStats(device_id, savedEvent);
 
-    // Check for consecutive failures and trigger notifications
-    if (status === SyncStatus.FAILED) {
-      const device = await this.deviceService.findOne(device_id);
-      if (device && device.consecutiveFailures >= 3) {
-        await this.notificationService.handleRepeatedFailure(device);
-      }
-    }
+    // TODO: Check for consecutive failures and trigger notifications
 
     return savedEvent;
   }
