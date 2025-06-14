@@ -11,6 +11,7 @@ import {
 import { Repository } from 'typeorm';
 import { SyncEventRepository } from '../repositories/sync-event.repository';
 import { DeviceService } from 'src/modules/devices/services/device.service';
+import { CreateSyncEventDto } from '../dto/create-sync-event.dto';
 
 @Injectable()
 export class SyncEventService {
